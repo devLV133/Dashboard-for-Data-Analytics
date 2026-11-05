@@ -1,69 +1,39 @@
-# FTSE 100 Banking Analysis — Public Pilot
+# Banking Analytics Dashboard
 
-A small, runnable demonstration of a banking analytics dashboard based on public price data. This is not the full research application.
+A runnable Jupyter/Google Colab dashboard for exploring public daily prices for Barclays, HSBC, Lloyds, NatWest and Standard Chartered.
 
-## What it shows
+## What it does
 
-- Select a UK-listed bank and a lookback period.
-- View adjusted daily prices, returns and an interactive Plotly chart.
-- Optionally request a short OpenAI explanation based on the selected market-data summary.
+- Retrieves split/dividend-adjusted closing prices through yfinance.
+- Removes missing, non-numeric, non-finite and non-positive prices and duplicate dates.
+- Shows period return, annualised daily-return volatility and actual observation dates.
+- Provides interactive line/area charts and a moving-average control.
+- Optionally asks OpenAI to explain the currently loaded price summary.
 
 ## Run
 
-1. Open `FTSE100_Banking_Analysis_Public_Pilot.ipynb` in Google Colab or Jupyter.
-2. Run the setup and dashboard cells in order, then click **Load prices**.
-3. For the optional AI button, run Section 4 and set `OPENAI_API_KEY` in the runtime (do not save it in the file). You may override `OPENAI_MODEL`.
+1. Open [FTSE100_Banking_Analysis_Public_Pilot.ipynb](FTSE100_Banking_Analysis_Public_Pilot.ipynb) in Google Colab or Jupyter.
+2. Run Sections 1–3 in order. The setup cell installs yfinance, pandas, numpy, plotly, ipywidgets and openai.
+3. Select a bank and period, then click **Load prices**. Market-data retrieval needs internet access.
+4. Change the chart type or moving-average window to redraw the loaded data. Changing bank or period clears the old view; click **Load prices** again.
+5. For optional AI explanations, set `OPENAI_API_KEY` in the runtime and run Section 4, then click **Explain view**. Do not save a key in the notebook. `OPENAI_MODEL` overrides the default `gpt-4.1-mini`.
 
-Live public prices require internet. The optional AI function requires OpenAI API access and may incur charges. It is not a full retrieval or validation pipeline; do not treat its output as independently verified.
+The dashboard works without an API key. AI requests require access to the selected model and may incur charges. No GPU is needed.
 
-## REQUIREMENTS
+## Calculations and scope
 
-- Internet access.
-- Google Colab or a local Jupyter environment with Python.
-- An OpenAI API key and access to your chosen model for AI chat.
-- No GPU is needed.
+Period return is `(last adjusted close / first adjusted close - 1) × 100`. Annualised volatility is the sample standard deviation of daily percentage returns multiplied by `sqrt(252)`. Dividends are already reflected in adjusted closes and are not added again. Quote units come from Yahoo Finance and are not necessarily pounds.
 
-The first cell installs pandas, matplotlib, yfinance, openai and Gradio. You can leave the API key blank to use only the comparison table and chart.
+This is a public pilot, not the full dissertation research system. It does not retrieve news, validate current FTSE membership, run an agent workflow or independently verify AI explanations. It shows one selected bank at a time.
 
-HOW TO RUN
+## Checks
 
-1. Open the notebook.
-Download AI_Banking_Research_Mini.ipynb. Upload it at https://colab.research.google.com/ or open it in Jupyter.
+After installing the notebook dependencies, run `python -m unittest discover -s tests -v`. The tests use the notebook's actual functions and cover invalid prices, insufficient observations, duplicate dates, returns and sample volatility without external API calls.
 
-2. Install dependencies.
-Run the first code cell and wait for installation to finish. If prompted to restart the session, do so before continuing.
+## Troubleshooting
 
-3. Configure the pilot.
-Run the configuration cell. The defaults are Barclays and HSBC over three months. Change SELECTED_BANKS and PERIOD if needed. Supported periods are 1mo, 3mo, 6mo and 1y.
+- Missing imports or widgets: run the setup and following cells in order, then restart the kernel if the installation requests it.
+- No usable data: check the connection, select another period or retry later. The provider may return incomplete data or limit requests.
+- AI unavailable: check the runtime key, model access and account balance. The price dashboard remains usable.
 
-Set MODEL to a model available through your OpenAI API account. The notebook defaults to gpt-6-luna; this setting does not verify availability. Enter your API key at the hidden prompt, or press Enter for data-only use.
-
-4. Prepare market-data functions.
-Run the Public market data cell. This defines the retrieval and comparison functions. No visible output is expected yet.
-
-5. Generate the comparison.
-Run the Example comparison cell. It retrieves prices and displays a return table and chart. The table shows the actual shared comparison dates. Returns use split/dividend-adjusted closes; dividends are not added again.
-
-6. Prepare AI responses.
-Run the Basic AI response cell. This defines the chat function without sending an AI request.
-
-7. Launch the chat interface.
-Run the Chat interface cell. In Colab, choose a password when prompted. Open the displayed interface or generated link. Sign in with username researcher and the password you chose. Local Jupyter normally displays the interface without this Colab login step.
-
-8. Ask a question.
-Select banks and a period in the interface. Try: Compare these banks and show the actual dates.
-
-Change the dropdowns for a different comparison and clear the chat after changing scope. The pilot does not automatically change the controls based on your question. Keep the notebook session running while chatting. Each submitted AI question uses your OpenAI API account.
-
-TROUBLESHOOTING
-
-Missing package or undefined function: Run the preceding cells in order.
-No usable price data: Retry later or select different banks.
-AI request fails: Check your API key, model access and connection.
-Embedded chat does not open: Open the generated Gradio link in a separate tab.
-
-SCOPE AND VALIDATION
-
-This pilot supports price comparisons. News retrieval, advanced analysis and the full research workflow are not included. Core logic passed offline checks; live API and browser execution were not tested here.
-
-Clear outputs before publishing a run containing private questions or session links. Do not put your API key directly into notebook code.
+Clear outputs before publishing a run containing private questions or session information.
